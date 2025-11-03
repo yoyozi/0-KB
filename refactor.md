@@ -47,20 +47,10 @@ Transform the current folder of markdown files into a searchable Next.js knowled
 
 ---
 
-## Phase 3: Vector Database Integration
+## Phase 3: Simple searching with fuse
 
-### 3.1 Choose & Setup Vector Database
-- [ ] Evaluate options: Pinecone, Weaviate, Qdrant, or local solution (Faiss)
-- [ ] Set up chosen vector database (cloud or local)
-- [ ] Configure API keys and connection settings
-- [ ] Create database schema/collection for knowledge base entries
-
-### 3.2 Embedding Generation
-- [ ] Choose embedding model (OpenAI, Cohere, or open-source like Sentence-Transformers)
-- [ ] Install embedding generation libraries
-- [ ] Create script to generate embeddings for all markdown content
-- [ ] Split large documents into chunks for better search results
-- [ ] Store embeddings with metadata in vector database
+### 3.1 Fuse
+- [ ] Setup search
 
 ### 3.3 Indexing Pipeline
 - [ ] Create script to process all markdown files and generate embeddings
