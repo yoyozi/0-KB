@@ -1,0 +1,43 @@
+name: Deploy knowledgebase
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - run: npm ci
+      - run: npm run build
+
+      - name: Rsync build artifacts
+        uses: burnett01/rsync-deployments@6.0.0
+        with:
+          switches: -avzr --delete
+          path: |
+            .next/standalone/
+            .next/static/
+            public/
+            package.json
+            package-lock.json
+          remote_path: /var/www/knowledgebase.netsecurity.co.za/app/
+          remote_host: ${{ secrets.SSH_HOST }}
+          remote_user: ${{ secrets.SSH_USER }}
+          remote_key: ${{ secrets.SSH_KEY }}
+
+      - name: Install prod deps and restart service
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd /var/www/knowledgebase.netsecurity.co.za/app
+            npm ci --omit=dev
+            sudo systemctl restart knowledgebase-netsecurity-co-za.service
