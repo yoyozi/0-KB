@@ -149,4 +149,5 @@ See `refactor.md` for the complete development roadmap and progress tracking.
 
 ## License
 
-Private project - not for public distribution.
+Public project for public use: NOTHING NEW HERE
+
