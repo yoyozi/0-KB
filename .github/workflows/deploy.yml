@@ -16,6 +16,11 @@ jobs:
       - run: npm ci
       - run: npm run build
 
+      - name: Add server to known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+
       - name: Rsync build artifacts
         uses: burnett01/rsync-deployments@6.0.0
         with:
@@ -41,3 +46,4 @@ jobs:
             cd /var/www/knowledgebase.netsecurity.co.za/app
             npm ci --omit=dev
             sudo systemctl restart knowledgebase-netsecurity-co-za.service
+            
