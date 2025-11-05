@@ -19,7 +19,7 @@ jobs:
       - name: Add server to known_hosts
         run: |
           mkdir -p ~/.ssh
-          ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+          ssh-keyscan -T 10 -p 22 -H "${{ secrets.SSH_HOST }}" >> ~/.ssh/known_hosts
 
       - name: Rsync build artifacts
         uses: burnett01/rsync-deployments@6.0.0
