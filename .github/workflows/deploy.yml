@@ -51,19 +51,19 @@ jobs:
             ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/var/www/knowledgebase.netsecurity.co.za/app/
 
 
-          - name: Install prod deps and restart service
-            run: |
-              set -e
-              ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} '
-                set -e
-                cd /var/www/knowledgebase.netsecurity.co.za/app
-                echo "PWD=$(pwd)"
-                ls -la
-                echo "Cleaning any existing node_modules (if present)..."
-                rm -rf node_modules
-                echo "Installing production dependencies..."
-                npm ci --omit=dev --no-audit --no-fund
-                echo "Restarting service..."
-                sudo /bin/systemctl restart knowledgebase-netsecurity-co-za.service
-                echo "Service restarted."
-              '
+      - name: Install prod deps and restart service
+        run: |
+          set -e
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} '
+            set -e
+            cd /var/www/knowledgebase.netsecurity.co.za/app
+            echo "PWD=$(pwd)"
+            ls -la
+            echo "Cleaning any existing node_modules (if present)..."
+            rm -rf node_modules
+            echo "Installing production dependencies..."
+            npm ci --omit=dev --no-audit --no-fund
+            echo "Restarting service..."
+            sudo /bin/systemctl restart knowledgebase-netsecurity-co-za.service
+            echo "Service restarted."
+          '
