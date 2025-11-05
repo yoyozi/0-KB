@@ -45,5 +45,4 @@ jobs:
           script: |
             cd /var/www/knowledgebase.netsecurity.co.za/app
             npm ci --omit=dev
-            sudo systemctl restart knowledgebase-netsecurity-co-za.service
-            
+            sudo /bin/systemctl restart knowledgebase-netsecurity-co-za.service
