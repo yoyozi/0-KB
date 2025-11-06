@@ -30,6 +30,9 @@ jobs:
           cp -a .next/standalone deploy/.next/
           cp -a .next/static deploy/.next/
           if [ -f .next/BUILD_ID ]; then cp -a .next/BUILD_ID deploy/.next/; fi
+          # Include Next.js manifests required to serve chunks/assets
+          shopt -s nullglob || true
+          for f in .next/*.json; do cp -a "$f" deploy/.next/; done
           cp -a public deploy/
           cp -a package.json package-lock.json deploy/
           echo "Staged contents:" && find deploy -maxdepth 2 -mindepth 1 -print
@@ -95,7 +98,7 @@ jobs:
                 echo "ERROR: BUILD_ID mismatch"; exit 1;
               fi
             fi
-            sudo /bin/systemctl daemon-reload
-            sudo /bin/systemctl restart knowledgebase-netsecurity-co-za.service
-            sudo /bin/systemctl status --no-pager knowledgebase-netsecurity-co-za.service || true
+            sudo -n /bin/systemctl daemon-reload
+            sudo -n /bin/systemctl restart knowledgebase-netsecurity-co-za.service
+            sudo -n /bin/systemctl status --no-pager knowledgebase-netsecurity-co-za.service || true
             echo "Remote app layout:" && ls -la /var/www/knowledgebase.netsecurity.co.za/app && ls -la /var/www/knowledgebase.netsecurity.co.za/app/.next || true
