@@ -17,53 +17,53 @@ jobs:
       - run: npm run build
 
       - name: Validate secrets
-      - run: |
-          set -e
-          test -n "${{ secrets.SSH_HOST }}" || (echo "Missing SSH_HOST" && exit 1)
-          test -n "${{ secrets.SSH_USER }}" || (echo "Missing SSH_USER" && exit 1)
-          test -n "${{ secrets.SSH_KEY }}"  || (echo "Missing SSH_KEY"  && exit 1)
-      
-      - name: Prepare SSH key and known_hosts
-      - run: |
-          set -e
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/deploy_key
-          sed -i 's/\r$//' ~/.ssh/deploy_key
-          chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -T 10 -p 22 -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
 
+        run: |
+          test -n "${{ secrets.SSH_HOST }}" || (echo "Missing SSH_HOST secret" && exit 1)
+          test -n "${{ secrets.SSH_USER }}" || (echo "Missing SSH_USER secret" && exit 1)
+          test -n "${{ secrets.SSH_KEY }}"  || (echo "Missing SSH_KEY secret"  && exit 1)
       
       - name: Add server to known_hosts
         run: |
           mkdir -p ~/.ssh
           ssh-keyscan -T 10 -p 22 -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Rsync build artifacts
-        run: |
-          set -e
-          rsync -avzr --delete \
-            -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes" \
-            .next/standalone/ \
-            .next/static/ \
-            public/ \
-            package.json \
-            package-lock.json \
-            ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/var/www/knowledgebase.netsecurity.co.za/app/
+      - name: Ensure app directory ownership and permissions
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            set -e
+            sudo mkdir -p /var/www/knowledgebase.netsecurity.co.za/app
+            sudo chown -R deploy:www-data /var/www/knowledgebase.netsecurity.co.za
+            sudo chmod -R g+rwX /var/www/knowledgebase.netsecurity.co.za
+            sudo chmod g+s /var/www/knowledgebase.netsecurity.co.za/app
+            sudo -u deploy rm -rf /var/www/knowledgebase.netsecurity.co.za/app/node_modules || true
 
+      - name: Rsync build artifacts
+        uses: burnett01/rsync-deployments@6.0.0
+        with:
+          switches: -avzr --delete
+          path: |
+            .next/standalone/
+            .next/static/
+            public/
+            package.json
+            package-lock.json
+          remote_path: /var/www/knowledgebase.netsecurity.co.za/app/
+          remote_host: ${{ secrets.SSH_HOST }}
+          remote_user: ${{ secrets.SSH_USER }}
+          remote_key: ${{ secrets.SSH_KEY }}
 
       - name: Install prod deps and restart service
-        run: |
-          set -e
-          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} '
-            set -e
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
             cd /var/www/knowledgebase.netsecurity.co.za/app
-            echo "PWD=$(pwd)"
-            ls -la
-            echo "Cleaning any existing node_modules (if present)..."
-            rm -rf node_modules
-            echo "Installing production dependencies..."
-            npm ci --omit=dev --no-audit --no-fund
-            echo "Restarting service..."
+            npm ci --omit=dev
             sudo /bin/systemctl restart knowledgebase-netsecurity-co-za.service
-            echo "Service restarted."
-          '
