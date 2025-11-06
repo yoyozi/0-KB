@@ -30,7 +30,7 @@ jobs:
       - name: Rsync build artifacts
         uses: burnett01/rsync-deployments@6.0.0
         with:
-          switches: -avzr --delete
+          switches: -avzr --delete --exclude 'node_modules' --exclude '.git*'
           path: |
             .next/standalone/
             .next/static/
