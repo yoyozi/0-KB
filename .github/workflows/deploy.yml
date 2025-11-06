@@ -29,6 +29,7 @@ jobs:
           mkdir -p deploy/.next
           cp -a .next/standalone deploy/.next/
           cp -a .next/static deploy/.next/
+          if [ -f .next/BUILD_ID ]; then cp -a .next/BUILD_ID deploy/.next/; fi
           cp -a public deploy/
           cp -a package.json package-lock.json deploy/
           echo "Staged contents:" && find deploy -maxdepth 2 -mindepth 1 -print
