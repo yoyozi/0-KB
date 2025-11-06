@@ -22,6 +22,17 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Stage deploy artifacts
+        run: |
+          set -e
+          rm -rf deploy
+          mkdir -p deploy/.next
+          cp -a .next/standalone deploy/
+          cp -a .next/static deploy/.next/
+          cp -a public deploy/
+          cp -a package.json package-lock.json deploy/
+          echo "Staged contents:" && find deploy -maxdepth 2 -mindepth 1 -print
+
       - name: Verify standalone build exists
         run: |
           ls -la .next || true
@@ -48,12 +59,7 @@ jobs:
         uses: burnett01/rsync-deployments@6.0.0
         with:
           switches: -avzr --delete --exclude='/node_modules' --exclude='.git*'
-          path: |
-            .next/standalone/
-            .next/static/
-            public/
-            package.json
-            package-lock.json
+          path: deploy/
           remote_path: /var/www/knowledgebase.netsecurity.co.za/app/
           remote_host: ${{ secrets.SSH_HOST }}
           remote_user: ${{ secrets.SSH_USER }}
