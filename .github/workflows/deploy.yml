@@ -33,6 +33,11 @@ jobs:
           # Include Next.js manifests required to serve chunks/assets
           shopt -s nullglob || true
           for f in .next/*.json; do cp -a "$f" deploy/.next/; done
+          # Also mirror required files inside standalone/.next for the Node server
+          mkdir -p deploy/.next/standalone/.next
+          cp -a .next/static deploy/.next/standalone/.next/
+          if [ -f .next/BUILD_ID ]; then cp -a .next/BUILD_ID deploy/.next/standalone/.next/; fi
+          for f in .next/*.json; do cp -a "$f" deploy/.next/standalone/.next/; done
           cp -a public deploy/
           cp -a package.json package-lock.json deploy/
           echo "Staged contents:" && find deploy -maxdepth 2 -mindepth 1 -print
