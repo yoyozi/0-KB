@@ -27,7 +27,7 @@ jobs:
           set -e
           rm -rf deploy
           mkdir -p deploy/.next
-          cp -a .next/standalone deploy/
+          cp -a .next/standalone deploy/.next/
           cp -a .next/static deploy/.next/
           cp -a public deploy/
           cp -a package.json package-lock.json deploy/
@@ -76,3 +76,4 @@ jobs:
             sudo /bin/systemctl daemon-reload
             sudo /bin/systemctl restart knowledgebase-netsecurity-co-za.service
             sudo /bin/systemctl status --no-pager knowledgebase-netsecurity-co-za.service || true
+            echo "Remote app layout:" && ls -la /var/www/knowledgebase.netsecurity.co.za/app && ls -la /var/www/knowledgebase.netsecurity.co.za/app/.next || true
