@@ -102,3 +102,6 @@ jobs:
             sudo -n /bin/systemctl restart knowledgebase-netsecurity-co-za.service
             sudo -n /bin/systemctl status --no-pager knowledgebase-netsecurity-co-za.service || true
             echo "Remote app layout:" && ls -la /var/www/knowledgebase.netsecurity.co.za/app && ls -la /var/www/knowledgebase.netsecurity.co.za/app/.next || true
+            echo "Listing .next/static/css (if present):" && ls -la /var/www/knowledgebase.netsecurity.co.za/app/.next/static/css || true
+            echo "Probe CSS path from app root:" && CSS=$(curl -s http://127.0.0.1:3003/ | grep -oE '/_next/static/[^"\?]+\.css' | head -n1 || true) && echo "CSS=$CSS" && if [ -n "$CSS" ]; then curl -I "http://127.0.0.1:3003$CSS" || true; fi
+            echo "Recent app logs:" && sudo -n journalctl -u knowledgebase-netsecurity-co-za.service -n 60 --no-pager || true
