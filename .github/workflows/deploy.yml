@@ -130,4 +130,36 @@ jobs:
             sudo -n /bin/systemctl restart knowledgebase-netsecurity-co-za.service
             sudo -n /bin/systemctl status --no-pager knowledgebase-netsecurity-co-za.service || true
             echo "Remote app layout:" && ls -la /var/www/knowledgebase.netsecurity.co.za/app && ls -la /var/www/knowledgebase.netsecurity.co.za/app/.next || true
+
+      - name: Health check (app port)
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            set -e
+            for i in {1..10}; do
+              if curl -fsS http://127.0.0.1:3003/healthz >/dev/null; then
+                echo "App port health OK"; exit 0;
+              fi
+              echo "Waiting for app port health... ($i)"; sleep 2;
+            done
+            echo "Health check failed on app port"; exit 1
+
+      - name: Health check (through Nginx)
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            set -e
+            for i in {1..10}; do
+              if curl -fsS -H "Host: knowledgebase.netsecurity.co.za" http://127.0.0.1/healthz >/dev/null; then
+                echo "Nginx health OK"; exit 0;
+              fi
+              echo "Waiting for Nginx health... ($i)"; sleep 2;
+            done
+            echo "Health check failed via Nginx"; exit 1
             
