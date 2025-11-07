@@ -93,17 +93,17 @@ jobs:
             ENV_FILE=/etc/knowledgebase.netsecurity.co.za.env
             cd /var/www/knowledgebase.netsecurity.co.za/app
             if [ -f "$ENV_FILE" ]; then
-              # Export variables from env file (simple KEY=VALUE lines)
-              set -a
-              . "$ENV_FILE"
-              set +a
-            fi
-            if [ -n "${MIGRATE_CMD:-}" ]; then
-              echo "Running migrations: $MIGRATE_CMD"
-              sh -lc "$MIGRATE_CMD"
-              echo "Migrations completed."
+              # Read only the MIGRATE_CMD=... line, normalize CRLF, and extract value safely
+              MIGRATE_CMD_VALUE=$(sed 's/\r$//' "$ENV_FILE" | grep -E '^MIGRATE_CMD=' | tail -n1 | cut -d= -f2-)
+              if [ -n "$MIGRATE_CMD_VALUE" ]; then
+                echo "Running migrations: $MIGRATE_CMD_VALUE"
+                sh -lc "$MIGRATE_CMD_VALUE"
+                echo "Migrations completed."
+              else
+                echo "No MIGRATE_CMD set in $ENV_FILE; skipping migrations."
+              fi
             else
-              echo "No MIGRATE_CMD set in $ENV_FILE; skipping migrations."
+              echo "Env file $ENV_FILE not found; skipping migrations."
             fi
 
       # No npm ci on server when deploying standalone
