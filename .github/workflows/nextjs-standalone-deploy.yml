@@ -132,6 +132,7 @@ jobs:
               MIGRATE_CMD_VALUE=$(sed 's/\r$//' "$ENV_FILE" | grep -E '^MIGRATE_CMD=' | tail -n1 | cut -d= -f2-)
               if [ -n "$MIGRATE_CMD_VALUE" ]; then
                 echo "Running migrations: $MIGRATE_CMD_VALUE"
+                # Fixed: use eval instead of sh -lc to handle simple commands
                 eval "$MIGRATE_CMD_VALUE"
                 echo "Migrations completed."
               else
