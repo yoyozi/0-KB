@@ -132,7 +132,7 @@ jobs:
               MIGRATE_CMD_VALUE=$(sed 's/\r$//' "$ENV_FILE" | grep -E '^MIGRATE_CMD=' | tail -n1 | cut -d= -f2-)
               if [ -n "$MIGRATE_CMD_VALUE" ]; then
                 echo "Running migrations: $MIGRATE_CMD_VALUE"
-                sh -lc "$MIGRATE_CMD_VALUE"
+                eval "$MIGRATE_CMD_VALUE"
                 echo "Migrations completed."
               else
                 echo "No MIGRATE_CMD set in $ENV_FILE; skipping migrations."
